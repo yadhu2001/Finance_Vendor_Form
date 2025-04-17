@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #01508c;
+        }
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        input[type="text"], select {
+            padding: 8px;
+            width: 23%;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            box-shadow: 1px 1px 3px #e9ecef;
+        }
+        button {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            background-color: #01508c;
+            color: white;
+        }
+        button:hover {
+            background-color: #ffc814;
+            color: #01508c;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 1px 1px 5px #e9ecef;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #01508c;
+            color: white;
+        }
+        td input[type="checkbox"] {
+            margin: 0;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination a {
+            margin: 0 5px;
+            padding: 8px 12px;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .pagination a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Vendor List</h1>
+
+    <!-- Filter and Search Form -->
+    <form method="get">
+        <!-- You can add filter form elements here if needed -->
+    </form>
+
+    <!-- Vendor List and Export Form -->
+    <form method="post" action="{% url 'export_selected_vendors' %}">
+        {% csrf_token %}
+        <table>
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="select-all"> Select</th>
+                    <th>Requesting Dept</th>
+                    <th>Vendor Name</th>
+                    <th>Vendor Type</th>
+                    <th>GST No</th>
+                    <th>PAN No</th>
+                    <th>Company Status</th>
+                    <th>State</th>
+                    <th>Banking Name</th>
+                    <th>Bank</th>
+                    <th>IFSC</th>
+                    <th>Account Number</th>
+                    <th>Address</th>
+                    <th>STD Code with Phone No</th>
+                    <th>Contact Person</th>
+                    <th>City</th>
+                    <th>Contact Person Designation</th>
+                    <th>Website</th>
+                    <th>MSME</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                    <th>Business Description</th>
+                    <th>Pin</th>
+                    <th>Registration Certificate</th>
+                    <th>Bank Details</th>
+                    <th>PAN Document</th>
+                    <th>MSME Certificate</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vendor in vendors %}
+                <tr>
+                    <td><input type="checkbox" name="vendor_ids" value="{{ vendor.id }}"></td>
+                    <td>{{ vendor.get_requesting_lakshya_department_display }}</td>
+                    <td>{{ vendor.vendor_name }}</td>
+                    <td>{{ vendor.vendor_type }}</td>
+                    <td>{{ vendor.gst_no }}</td>
+                    <td>{{ vendor.pan_no }}</td>
+                    <td>{{ vendor.company_status }}</td>
+                    <td>{{ vendor.state }}</td>
+                    <td>{{ vendor.banking_name }}</td>
+                    <td>{{ vendor.bank }}</td>
+                    <td>{{ vendor.ifsc }}</td>
+                    <td>{{ vendor.account_number }}</td>
+                    <td>{{ vendor.address }}</td>
+                    <td>{{ vendor.std_code_phone_no }}</td>
+                    <td>{{ vendor.contact_person }}</td>
+                    <td>{{ vendor.city }}</td>
+                    <td>{{ vendor.contact_person_designation }}</td>
+                    <td>{{ vendor.website }}</td>
+                    <td>{{ vendor.is_msmse }}</td>
+                    <td>{{ vendor.mobile }}</td>
+                    <td>{{ vendor.email }}</td>
+                    <td>{{ vendor.business_description }}</td>
+                    <td>{{ vendor.pin }}</td>
+                    <td>
+                        {% if vendor.registration_certificate %}
+                            <a href="{{ vendor.registration_certificate.url }}" class="btn btn-primary" target="_blank">Open</a>
+                        {% else %}No file{% endif %}
+                    </td>
+                    <td>
+                        {% if vendor.bank_details %}
+                            <a href="{{ vendor.bank_details.url }}" class="btn btn-primary" target="_blank">Open</a>
+                        {% else %}No file{% endif %}
+                    </td>
+                    <td>
+                        {% if vendor.pan_document %}
+                            <a href="{{ vendor.pan_document.url }}" class="btn btn-primary" target="_blank">Open</a>
+                        {% else %}No file{% endif %}
+                    </td>
+                    <td>
+                        {% if vendor.msme_certificate %}
+                            <a href="{{ vendor.msme_certificate.url }}" class="btn btn-primary" target="_blank">Open</a>
+                        {% else %}No file{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Export Selected Vendors Button -->
+        <div style="margin-top: 20px;">
+            <button type="submit" name="export" value="csv">Export Selected to CSV</button>
+            <button type="submit" name="delete" value="delete" onclick="return confirmDelete()">Delete Selected</button>
+        </div>
+        
+    </form>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <span>Page {{ vendors.number }} of {{ vendors.paginator.num_pages }}</span>
+        <div>
+            {% if vendors.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ vendors.previous_page_number }}">previous</a>
+            {% endif %}
+            {% if vendors.has_next %}
+            <a href="?page={{ vendors.next_page_number }}">next</a>
+            <a href="?page={{ vendors.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- JavaScript for Select All functionality -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const selectAllCheckbox = document.getElementById("select-all");
+            const checkboxes = document.querySelectorAll('input[name="vendor_ids"]');
+
+            selectAllCheckbox.addEventListener("change", function () {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = selectAllCheckbox.checked;
+                });
+            });
+        });
+    </script>
+        <script>
+            function confirmDelete() {
+        const selected = document.querySelectorAll('input[name="vendor_ids"]:checked');
+        if (selected.length === 0) {
+            alert("Please select at least one vendor to delete.");
+            return false;
+        }
+        return confirm("Are you sure you want to delete the selected vendor(s)? This action cannot be undone.");
+    }
+
+        </script>
+
+</body>
+</html>
+
